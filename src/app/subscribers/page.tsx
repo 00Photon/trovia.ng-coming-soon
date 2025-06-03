@@ -1,5 +1,4 @@
-import { open } from 'sqlite';
-import sqlite3 from 'sqlite3';
+import { Pool } from 'pg';
 
 interface Subscriber {
   id: number;
@@ -7,15 +6,21 @@ interface Subscriber {
   subscribed_at: string;
 }
 
-const dbPromise = open({
-  filename: './waitlist.db',
-  driver: sqlite3.Database,
+const pool = new Pool({
+  connectionString: process.env.POSTGRES_URL || 'postgres://neondb_owner:npg_sortKmDuU6g2@ep-royal-bar-a43ppf7m-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require',
 });
 
 async function getSubscribers(): Promise<Subscriber[]> {
-  const db = await dbPromise;
-  const subscribers = await db.all('SELECT * FROM subscribers');
-  return subscribers;
+  const client = await pool.connect();
+  try {
+    const result = await client.query('SELECT * FROM subscribers');
+    return result.rows;
+  } catch (error) {
+    console.error('Error fetching subscribers:', error);
+    return [];
+  } finally {
+    client.release();
+  }
 }
 
 export default async function SubscribersPage() {

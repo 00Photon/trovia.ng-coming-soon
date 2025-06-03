@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import sqlite3 from 'sqlite3';
-import { open } from 'sqlite';
+import { Pool } from 'pg';
 import nodemailer from 'nodemailer';
 import * as z from 'zod';
 
@@ -8,28 +7,34 @@ const schema = z.object({
   email: z.string().email('Invalid email address'),
 });
 
-// interface ApiResponse {
-//   message?: string;
-//   error?: string;
-// }
-
-const dbPromise = open({
-  filename: './waitlist.db',
-  driver: sqlite3.Database,
+const pool = new Pool({
+  connectionString: process.env.POSTGRES_URL || 'postgres://neondb_owner:npg_sortKmDuU6g2@ep-royal-bar-a43ppf7m-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require',
 });
 
 async function initDb() {
-  const db = await dbPromise;
-  await db.exec(`
-    CREATE TABLE IF NOT EXISTS subscribers (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      email TEXT UNIQUE NOT NULL,
-      subscribed_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
+  const client = await pool.connect();
+  try {
+    console.log('Initializing database...');
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS subscribers (
+        id SERIAL PRIMARY KEY,
+        email TEXT UNIQUE NOT NULL,
+        subscribed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    console.log('Subscribers table created or already exists.');
+  } catch (error) {
+    console.error('Failed to initialize database:', error);
+    throw new Error(`Database initialization failed: ${error instanceof Error ? error.message : String(error)}`);
+  } finally {
+    client.release();
+  }
 }
 
-initDb().catch(console.error);
+// Run initDb and ensure errors are caught
+initDb().catch((error) => {
+  console.error('initDb error:', error);
+});
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp.gmail.com',
@@ -63,9 +68,7 @@ const sendConfirmationEmail = async (email: string) => {
           .button { display: inline-block; background-color: #1a3c34; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-size: 16px; font-weight: 500; margin: 5px; }
           .button:hover { background-color: #2e5b52; }
           .fun-section { background-color: #f9f9f9; padding: 15px; border-radius: 5px; text-align: center; margin: 20px 0; }
-          .footer { text-align: center; color: #666666; font-size: 12px; margin-top: 30px; border-top: 1px solid #e0e0e0; padding-top:  “
-
-20px; }
+          .footer { text-align: center; color: #666666; font-size: 12px; margin-top: 30px; border-top: 1px solid #e0e0e0; padding-top: 20px; }
         </style>
       </head>
       <body>
@@ -102,22 +105,26 @@ export async function POST(request: Request) {
     console.log('Received body:', body);
     const { email } = schema.parse(body);
     console.log('Parsed email:', email);
-    const db = await dbPromise;
+    const client = await pool.connect();
     console.log('Database connected');
 
-    const existing = await db.get('SELECT email FROM subscribers WHERE email = ?', [email]);
-    if (existing) {
-      console.log('Email already exists:', email);
-      return NextResponse.json({ error: 'Email already subscribed' }, { status: 400 });
+    try {
+      const existing = await client.query('SELECT email FROM subscribers WHERE email = $1', [email]);
+      if (existing.rows.length > 0) {
+        console.log('Email already exists:', email);
+        return NextResponse.json({ error: 'Email already subscribed' }, { status: 400 });
+      }
+
+      await client.query('INSERT INTO subscribers (email) VALUES ($1)', [email]);
+      console.log('Email inserted:', email);
+
+      await sendConfirmationEmail(email);
+      console.log('Confirmation email sent to:', email);
+
+      return NextResponse.json({ message: 'Subscribed successfully' }, { status: 200 });
+    } finally {
+      client.release();
     }
-
-    await db.run('INSERT INTO subscribers (email) VALUES (?)', [email]);
-    console.log('Email inserted:', email);
-
-    await sendConfirmationEmail(email);
-    console.log('Confirmation email sent to:', email);
-
-    return NextResponse.json({ message: 'Subscribed successfully' }, { status: 200 });
   } catch (error) {
     console.error('API Error:', error);
     const errorMessage = error instanceof Error ? error.message : String(error);
