@@ -85,26 +85,57 @@ export default function ComingSoon() {
     }
   };
 
+  // Handler for both click and touchstart events
+  const handleButtonClick = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault(); // Prevent default to avoid bubbling issues on mobile
+    setIsModalOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-purple-50 flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-48 h-48 bg-gradient-to-br from-purple-200 to-purple-300 rounded-full opacity-20 blur-2xl" />
-      <div className="absolute bottom-0 right-0 w-64 h-64 bg-gradient-to-br from-teal-200 to-teal-300 rounded-full opacity-20 blur-2xl" />
+      <div className="absolute top-0 left-0 w-48 h-48 bg-gradient-to-br from-purple-200 to-purple-300 rounded-full opacity-20 blur-2xl z-0" />
+      <div className="absolute bottom-0 right-0 w-64 h-64 bg-gradient-to-br from-teal-200 to-teal-300 rounded-full opacity-20 blur-2xl z-0" />
 
       <motion.div
-        className="text-center max-w-3xl mx-auto"
+        className="text-center max-w-3xl mx-auto relative z-10"
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
       >
         <h1 className="text-5xl md:text-6xl font-bold text-teal-800 mb-6">
-          Something Big is Coming!
+          Trovia.ng is Coming!
         </h1>
-        <p className="text-xl text-gray-600 leading-relaxed mb-8">
-          We are building something extraordinary. Join our waitlist to be the first to experience it when we launch!
+        <p className="text-xl text-gray-600 leading-relaxed mb-6">
+          Welcome to <span className="font-semibold text-teal-700">Trovia.ng</span>, Nigeria’s hyper-local job platform and marketplace! Connect with local artisans, post jobs, or find gigs in your community—effortlessly. Buy and sell goods with ease, from tools to furniture, all with no wahala!
         </p>
+        <div className="mb-8">
+          <h3 className="text-lg font-semibold text-teal-800 mb-4">What You Can Do with Trovia.ng:</h3>
+          <ul className="text-gray-600 text-base space-y-2">
+            <li className="flex items-center justify-center">
+              <svg className="w-5 h-5 text-teal-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              Hire skilled artisans like plumbers or carpenters in your area.
+            </li>
+            <li className="flex items-center justify-center">
+              <svg className="w-5 h-5 text-teal-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              Post jobs or find gigs as an artisan, fast and simple.
+            </li>
+            <li className="flex items-center justify-center">
+              <svg className="w-5 h-5 text-teal-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              Buy and sell items seamlessly in our stress-free marketplace.
+            </li>
+          </ul>
+        </div>
         <motion.button
-          onClick={() => setIsModalOpen(true)}
-          className="bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
+          onClick={handleButtonClick}
+          onTouchStart={handleButtonClick} // Added touchstart for mobile compatibility
+          className="bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl cursor-pointer z-10"
+          style={{ touchAction: 'manipulation' }} // Prevent zoom/scroll interference
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -123,24 +154,25 @@ export default function ComingSoon() {
           transition={{ duration: 0.3 }}
         >
           <motion.div
-            className="bg-white rounded-3xl p-8 max-w-md w-full mx-4 relative"
+            className="bg-white rounded-3xl p-8 max-w-md w-full mx-4 relative z-50"
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.3 }}
           >
             <button
               onClick={() => setIsModalOpen(false)}
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+              onTouchStart={() => setIsModalOpen(false)} // Added touchstart for mobile
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 cursor-pointer"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
             <h2 className="text-2xl font-bold text-teal-800 mb-4">
-              Join Our Waitlist
+              Join the Trovia.ng Waitlist
             </h2>
             <p className="text-gray-600 mb-6">
-              Enter your email to get exclusive early access.
+              Enter your email to get exclusive early access to Nigeria’s hyper-local job platform and marketplace.
             </p>
             <form onSubmit={handleSubmit(onSubmit)}>
               <FormField label="Email Address" error={errors.email?.message}>
@@ -162,7 +194,9 @@ export default function ComingSoon() {
               <motion.button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                style={{ touchAction: 'manipulation' }} // Prevent zoom/scroll interference
+                onTouchStart={isSubmitting ? undefined : handleSubmit(onSubmit)} // Added touchstart for mobile
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -198,9 +232,7 @@ export default function ComingSoon() {
       )}
 
       <motion.p
-        className="text-center text-gray-500 text-sm Рек
-
-System: mt-8 absolute bottom-4"
+        className="text-center text-gray-500 text-sm mt-8 absolute bottom-4 z-10"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8, delay: 0.6 }}

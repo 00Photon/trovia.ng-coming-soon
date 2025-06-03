@@ -74,8 +74,8 @@ const sendConfirmationEmail = async (email: string) => {
             <h1>Welcome to Trovia.ng! 🎉</h1>
           </div>
           <div class="content">
-            <p>Guess what? I’m as happy as you are right now—maybe even happier, because you’ve just joined the Trovia.ng waitlist! We’re both doing a little happy dance 🕺💃.</p>
-            <p>At Trovia.ng, we’re building a <span class="highlight">hyper-local job platform</span> to connect Nigerian communities. Need a plumber in your area? Want to hire a local artisan? Or maybe you’re an artisan looking for gigs? We’ve got you covered! You can post jobs, and artisans can find work—easy peasy.</p>
+            <p>Guess what? I’m as happy as you are right now maybe even happier, because you’ve just joined the Trovia.ng waitlist! We’re both doing a little happy dance 🕺💃.</p>
+            <p>At Trovia.ng, we’re building a <span class="highlight">hyper local job platform</span> to connect Nigerian communities. Need a plumber in your area? Want to hire a local artisan? Or maybe you’re an artisan looking for gigs? We’ve got you covered! You can post jobs, and artisans can find work easy peasy.</p>
             <p>But wait, there’s more! Our <span class="highlight">marketplace</span> lets you buy and sell seamlessly, without any stress or hassle. Need a new hammer for your DIY project? Or want to sell that extra chair? We make it happen, no wahala!</p>
             <div class="fun-section">
               <p><strong>Quick question:</strong> What’s the first thing you’d love to do on Trovia.ng?</p>
